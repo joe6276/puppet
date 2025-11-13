@@ -1,9 +1,5 @@
 const puppeteer = require("puppeteer")
 
-const path=require('path')
-const dotenv = require("dotenv")
-
-dotenv.config({path:path.resolve(__dirname, "../.env")})
 // Browser configuration for production
 const getBrowserConfig = () => {
     const config = {
@@ -18,9 +14,7 @@ const getBrowserConfig = () => {
         ]
     };
     
-    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    config.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-  }
+
     return config;
 };
 
