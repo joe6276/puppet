@@ -311,6 +311,6 @@ try {
     return res.status(500).json({error})
 }
 }
- run()
+
 
 module.exports = { getScrapped, getDetailedScrapped };
