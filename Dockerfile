@@ -1,11 +1,9 @@
-# Use official Node.js LTS image
 FROM node:18-slim
 
-# Install necessary dependencies for Chromium
+# Install Chromium and dependencies
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ca-certificates \
+    chromium \
+    chromium-sandbox \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -29,6 +27,10 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
+# Set environment variable to tell Puppeteer to use installed Chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 # Set working directory
 WORKDIR /app
 
@@ -38,14 +40,11 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci --only=production
 
-# Install Chromium via Puppeteer
-RUN npx puppeteer browsers install chrome
-
 # Copy application files
 COPY . .
 
 # Expose port (adjust as needed)
-EXPOSE 80
+EXPOSE 3000
 
 # Start the application
 CMD ["node", "index.js"]
