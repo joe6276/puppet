@@ -1,5 +1,9 @@
 const puppeteer = require("puppeteer")
 
+const path=require('path')
+const dotenv = require("dotenv")
+
+dotenv.config({path:path.resolve(__dirname, "../.env")})
 // Browser configuration for production
 const getBrowserConfig = () => {
     const config = {
@@ -14,11 +18,9 @@ const getBrowserConfig = () => {
         ]
     };
     
-    // Use system Chromium in production
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-        config.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-    }
-    
+    config.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
     return config;
 };
 
@@ -269,29 +271,36 @@ async function scrapeAllPages(startUrl = "https://intl-colt.online", options = {
   }
 }
 
-async function run() {
-    console.log("Hello");
+// async function run() {
+//     console.log("Hello");
     
-    const response = await scrapeURL("https://intl-colt.online/")
-    console.log(response);
+//     const response = await scrapeURL("https://intl-colt.online/")
+//     console.log(response);
+// }
+
+async function getScrapped(req,res) {
+try {
+        const {url, userId}= req.body
+
+        const response = await scrapeURL(url)
+
+        return res.status(200).json({response})
+} catch (error) {
+    return res.status(500).json({error})
+}
 }
 
-async function getScrapped(req, res) {
-    try {
-        const response = await scrapeURL("https://intl-colt.online")
+async function getDetailedScrapped(req,res) {
+try {
+        const {url, userId}= req.body
+
+        const response = await scrapeAllPages(url)
+
         return res.status(200).json({response})
-    } catch (error) {
-        return res.status(500).json({error: error.message})
-    }
+} catch (error) {
+    return res.status(500).json({error})
+}
 }
 
-async function getDetailedScrapped(req, res) {
-    try {
-        const response = await scrapeAllPages("https://intl-colt.online")
-        return res.status(200).json({response})
-    } catch (error) {
-        return res.status(500).json({error: error.message})
-    }
-}
 
 module.exports = { getScrapped, getDetailedScrapped };
