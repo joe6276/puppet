@@ -1,9 +1,10 @@
 const express= require("express")
 const {json}= require('express')
+const { puppetRouter } = require("./Routes")
 const app= express()
 
 app.use(json())
-app.use('/scrap', router)
+app.use('/scrap', puppetRouter)
 
 
  app.listen(80, ()=>{

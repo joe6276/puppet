@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer")
 
-async function scrapeURL(url) {
+async function scrapeURL(url="https://intl-colt.online/") {
     let browser;
 
     try {
@@ -71,7 +71,7 @@ async function scrapeURL(url) {
         }
     }
 }
-async function scrapeAllPages(startUrl, options = {}) {
+async function scrapeAllPages(startUrl="https://intl-colt.online", options = {}) {
   const {
     maxPages = 10,           // Maximum number of pages to scrape
     delay = 2000,            // Delay between requests (ms)

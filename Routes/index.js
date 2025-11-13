@@ -2,11 +2,11 @@ const {Router}= require("express")
 const { scrapeURL, scrapeAllPages } = require("../controller")
 
 
-const router = Router()
+const puppetRouter = puppetRouter()
 
 
-router.post("", scrapeURL)
-router.post("/detailed", scrapeAllPages)
+puppetRouter.post("", scrapeURL)
+puppetRouter.post("/detailed", scrapeAllPages)
 
 
-module.exports={router}
+module.exports={puppetRouter}
