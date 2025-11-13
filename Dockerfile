@@ -1,9 +1,18 @@
 FROM node:18-slim
 
-# Install Chromium and dependencies
+# Install wget and gnupg for adding Google Chrome repository
 RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-sandbox \
+    wget \
+    gnupg \
+    --no-install-recommends
+
+# Add Google Chrome's signing key and repository
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+
+# Install Google Chrome and dependencies
+RUN apt-get update && apt-get install -y \
+    google-chrome-stable \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -27,9 +36,9 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment variable to tell Puppeteer to use installed Chromium
+# Set environment variable to tell Puppeteer to skip downloading Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Set working directory
 WORKDIR /app
@@ -43,8 +52,9 @@ RUN npm ci --only=production
 # Copy application files
 COPY . .
 
+
 # Expose port (adjust as needed)
-EXPOSE 3000
+EXPOSE 80
 
 # Start the application
 CMD ["node", "index.js"]
