@@ -294,6 +294,4 @@ async function getDetailedScrapped(req, res) {
     }
 }
 
-run()
-
 module.exports = { getScrapped, getDetailedScrapped };
