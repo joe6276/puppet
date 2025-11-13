@@ -5,8 +5,8 @@ const {  getScrapped, getDetailedScrapped } = require("../controller")
 const puppetRouter = Router()
 
 
-puppetRouter.get("", getScrapped)
-puppetRouter.get("/detailed", getDetailedScrapped)
+puppetRouter.post("", getScrapped)
+puppetRouter.post("/detailed", getDetailedScrapped)
 
 
 module.exports={puppetRouter}
