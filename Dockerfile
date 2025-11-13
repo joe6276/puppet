@@ -1,60 +1,67 @@
-FROM node:18-slim
+# -------------------------------
+# Stage 1: Build & Install Puppeteer
+# -------------------------------
+FROM node:18-alpine AS builder
 
-# Install wget and gnupg for adding Google Chrome repository
-RUN apt-get update && apt-get install -y \
+# Install system dependencies for Chromium
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    udev \
     wget \
-    gnupg \
-    --no-install-recommends
+    dumb-init
 
-# Add Google Chrome's signing key and repository
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
-
-# Install Google Chrome and dependencies
-RUN apt-get update && apt-get install -y \
-    google-chrome-stable \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    xdg-utils \
-    libxshmfence1 \
-    libglu1-mesa \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set environment variable to tell Puppeteer to skip downloading Chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+# Set environment variables for Puppeteer
+# These tell Puppeteer to use the system-installed Chromium
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install production dependencies only
+RUN npm ci --omit=dev
 
-# Copy application files
+# Copy application source
 COPY . .
 
+# -------------------------------
+# Stage 2: Runtime
+# -------------------------------
+FROM node:18-alpine
 
-# Expose port (adjust as needed)
+# Install only what’s needed to run Chromium
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    dumb-init
+
+# Set Puppeteer environment
+ENV NODE_ENV=production
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
+WORKDIR /app
+
+# Copy compiled app and node_modules from builder
+COPY --from=builder /app /app
+
+# Expose your server port (if using Express)
 EXPOSE 80
 
-# Start the application
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Run your Node.js application
 CMD ["node", "index.js"]
