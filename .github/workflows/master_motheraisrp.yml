@@ -27,6 +27,7 @@ jobs:
         run: |
           npm install
           npm run build --if-present
+          npm run postinstall --if-present
           npm run test --if-present
 
       - name: Upload artifact for deployment job
@@ -62,4 +63,5 @@ jobs:
           app-name: 'motheraisrp'
           slot-name: 'Production'
           package: .
+
           
